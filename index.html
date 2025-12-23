@@ -1,0 +1,591 @@
+<!doctype html>
+<html lang="id" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DidiArdian App</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Righteous&display=swap');
+    
+    body {
+      box-sizing: border-box;
+    }
+    
+    .signature-title {
+      font-family: 'Righteous', cursive;
+      letter-spacing: 2px;
+      text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
+    }
+    
+    .upload-area {
+      transition: all 0.3s ease;
+      border: 2px dashed #cbd5e1;
+    }
+    
+    .upload-area:hover {
+      border-color: #4f46e5;
+      background-color: #f8fafc;
+    }
+    
+    .upload-area.drag-over {
+      border-color: #4f46e5;
+      background-color: #eef2ff;
+    }
+    
+    .file-preview {
+      transition: all 0.3s ease;
+    }
+    
+    .file-preview:hover {
+      background-color: #f8fafc;
+    }
+    
+    .toast {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 16px 24px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      z-index: 1000;
+      animation: slideIn 0.3s ease-out;
+      max-width: 400px;
+    }
+    
+    @keyframes slideIn {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+    
+    .toast.success {
+      background-color: #10b981;
+      color: white;
+    }
+    
+    .toast.error {
+      background-color: #ef4444;
+      color: white;
+    }
+    
+    .loading {
+      opacity: 0.6;
+      pointer-events: none;
+    }
+
+    .history-item {
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full">
+  <div id="app" class="min-h-full w-full bg-gradient-to-br from-blue-50 to-indigo-100 overflow-auto">
+   <div class="container mx-auto px-4 py-8 max-w-6xl"><!-- Header -->
+    <header class="bg-gradient-to-r from-indigo-600 via-purple-600 to-blue-600 rounded-2xl shadow-lg p-8 mb-8 relative overflow-hidden"><!-- Background Pattern -->
+     <div class="absolute inset-0 opacity-10">
+      <svg class="w-full h-full" viewbox="0 0 400 400" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="30" fill="white" /> <circle cx="350" cy="80" r="40" fill="white" /> <circle cx="100" cy="300" r="25" fill="white" /> <circle cx="320" cy="320" r="35" fill="white" /> <rect x="150" y="50" width="100" height="100" fill="white" opacity="0.5" rx="10" /> <rect x="250" y="200" width="80" height="80" fill="white" opacity="0.5" rx="10" />
+      </svg>
+     </div>
+     <div class="relative z-10"><!-- Ilustrasi Upload -->
+      <div class="flex justify-center mb-6">
+       <svg class="w-32 h-32" viewbox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><!-- Cloud --> <ellipse cx="100" cy="120" rx="60" ry="35" fill="white" opacity="0.9" /> <circle cx="70" cy="120" r="30" fill="white" opacity="0.9" /> <circle cx="130" cy="120" r="30" fill="white" opacity="0.9" /> <!-- Document --> <rect x="80" y="90" width="40" height="50" fill="#fbbf24" rx="3" /> <line x1="85" y1="100" x2="115" y2="100" stroke="white" stroke-width="2" /> <line x1="85" y1="110" x2="115" y2="110" stroke="white" stroke-width="2" /> <line x1="85" y1="120" x2="110" y2="120" stroke="white" stroke-width="2" /> <!-- Arrow Up --> <path d="M 100 75 L 100 45 M 100 45 L 90 55 M 100 45 L 110 55" stroke="#10b981" stroke-width="4" fill="none" stroke-linecap="round" />
+       </svg>
+      </div>
+      <h1 id="pageTitle" class="signature-title text-5xl font-bold text-white text-center mb-3 drop-shadow-lg">DidiArdian App System</h1>
+      <p id="subjectName" class="text-sm text-white text-center mb-6 drop-shadow-md opacity-90">Aplikasi Prototype By Dr. Ardian Arief, M.Pd.</p><!-- Tanggal dan Waktu -->
+      <div class="flex flex-col sm:flex-row justify-center items-center gap-4">
+       <div class="flex items-center gap-2 bg-white bg-opacity-20 backdrop-blur-sm px-5 py-3 rounded-xl text-white border border-white border-opacity-30">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg><span id="currentDate" class="font-bold text-lg"></span>
+       </div>
+       <div class="flex items-center gap-2 bg-white bg-opacity-20 backdrop-blur-sm px-5 py-3 rounded-xl text-white border border-white border-opacity-30">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg><span id="currentTime" class="font-bold text-lg"></span>
+       </div>
+      </div>
+     </div>
+    </header><!-- Form Unggah -->
+    <main class="bg-white rounded-2xl shadow-lg p-8 mb-8">
+     <form id="uploadForm"><!-- Nama -->
+      <div class="mb-6"><label for="studentName" class="block text-lg font-bold text-purple-700 mb-2">👤 Nama Lengkap</label> <input type="text" id="studentName" placeholder="Masukkan nama lengkap Anda" class="w-full px-4 py-3 border-2 border-purple-300 bg-purple-50 rounded-lg focus:outline-none focus:border-purple-500 focus:bg-white text-gray-800 placeholder-purple-400" required>
+      </div><!-- NIM -->
+      <div class="mb-6"><label for="studentNIM" class="block text-lg font-bold text-blue-700 mb-2">🎓 NIM (Nomor Induk Mahasiswa)</label> <input type="text" id="studentNIM" placeholder="Masukkan NIM Anda" class="w-full px-4 py-3 border-2 border-blue-300 bg-blue-50 rounded-lg focus:outline-none focus:border-blue-500 focus:bg-white text-gray-800 placeholder-blue-400" required>
+      </div><!-- Kelas -->
+      <div class="mb-6"><label for="studentClass" class="block text-lg font-bold text-green-700 mb-2">📚 Kelas</label> <input type="text" id="studentClass" placeholder="Masukkan kelas Anda (contoh: A, B, C)" class="w-full px-4 py-3 border-2 border-green-300 bg-green-50 rounded-lg focus:outline-none focus:border-green-500 focus:bg-white text-gray-800 placeholder-green-400" required>
+      </div><!-- Mata Kuliah -->
+      <div class="mb-6"><label for="courseName" class="block text-lg font-bold text-orange-700 mb-2">📖 Mata Kuliah</label> <input type="text" id="courseName" placeholder="Masukkan nama mata kuliah" class="w-full px-4 py-3 border-2 border-orange-300 bg-orange-50 rounded-lg focus:outline-none focus:border-orange-500 focus:bg-white text-gray-800 placeholder-orange-400" required>
+      </div><!-- Upload File -->
+      <div class="mb-6"><label class="block text-lg font-bold text-gray-800 mb-2">Unggah File (PDF atau DOC/DOCX)</label>
+       <div class="upload-area rounded-lg p-8 text-center cursor-pointer" id="uploadArea"><input type="file" id="fileInput" accept=".pdf,.doc,.docx" class="hidden" required>
+        <svg class="w-16 h-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+        </svg>
+        <p class="text-gray-600 mb-2 font-semibold">Klik atau seret file ke sini</p>
+        <p class="text-sm text-gray-500">Format: PDF, DOC, atau DOCX (Maks. 10MB)</p>
+       </div><!-- File Preview -->
+       <div id="filePreview" class="hidden mt-4 p-4 bg-indigo-50 rounded-lg file-preview">
+        <div class="flex items-center justify-between">
+         <div class="flex items-center gap-3">
+          <svg class="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          <div>
+           <p id="fileName" class="font-semibold text-gray-800"></p>
+           <p id="fileSize" class="text-sm text-gray-600"></p>
+          </div>
+         </div><button type="button" id="removeFile" class="text-red-600 hover:text-red-700 font-semibold"> Hapus </button>
+        </div>
+       </div>
+      </div>
+     </form>
+    </main><!-- Submit Button -->
+    <div class="flex justify-center mb-8"><button id="submitBtn" type="button" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-lg px-12 py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"> <span id="submitBtnText">Kirim Tugas</span> </button>
+    </div><!-- Histori File Terkirim -->
+    <aside id="historySection" class="bg-white rounded-2xl shadow-lg p-8 mb-8 hidden">
+     <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-3">
+      <svg class="w-7 h-7 text-green-600" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg> Histori File Terkirim ke Google Drive</h2>
+     <p class="text-sm text-gray-600 mb-6">File-file berikut telah berhasil diunggah dan tersimpan di Google Drive</p>
+     <div id="historyList" class="space-y-3"><!-- History items will be inserted here -->
+     </div>
+    </aside><!-- Instructions -->
+    <footer class="bg-white rounded-xl shadow-md p-6">
+     <h2 class="text-xl font-bold text-gray-800 mb-4">📋 Panduan Penggunaan:</h2>
+     <ol class="list-decimal list-inside space-y-2 text-gray-700">
+      <li>Isi nama lengkap Anda pada kolom yang tersedia</li>
+      <li>Masukkan NIM (Nomor Induk Mahasiswa) Anda</li>
+      <li>Masukkan kelas Anda (contoh: A, B, C)</li>
+      <li>Masukkan nama mata kuliah</li>
+      <li>Unggah file tugas dalam format PDF, DOC, atau DOCX</li>
+      <li>Klik tombol "Kirim Tugas" untuk mengirim ke Google Spreadsheet</li>
+      <li>Tunggu notifikasi konfirmasi pengiriman berhasil</li>
+     </ol>
+     <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+      <p class="text-sm text-green-800"><strong>✅ Keuntungan Sistem Baru:</strong> File akan tersimpan langsung di Google Drive dan spreadsheet hanya menyimpan link download untuk akses mudah!</p>
+     </div>
+    </footer>
+   </div>
+  </div>
+  <script>
+    // Configuration
+    const defaultConfig = {
+      page_title: "DidiArdian App System",
+      subject_name: "Aplikasi Prototype By Dr. Ardian Arief, M.Pd.",
+      submit_button_text: "Kirim Tugas",
+      background_color: "#dbeafe",
+      card_color: "#ffffff",
+      primary_color: "#4f46e5",
+      text_color: "#1f2937",
+      button_color: "#4f46e5",
+      font_family: "system-ui",
+      font_size: 16
+    };
+
+    // State management
+    let selectedFile = null;
+    let uploadHistory = [];
+
+    // URL Google Apps Script Web App
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxrgHruaplx_f-qPo2l3fHupasuuTqTvGc1uzByeJNZqrpUuo91sncaI4iW46DuHodXQA/exec';
+
+    // Update date and time
+    function updateDateTime() {
+      const now = new Date();
+      
+      const dateOptions = { 
+        weekday: 'long', 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      };
+      document.getElementById('currentDate').textContent = 
+        now.toLocaleDateString('id-ID', dateOptions);
+      
+      const timeOptions = { 
+        hour: '2-digit', 
+        minute: '2-digit', 
+        second: '2-digit',
+        hour12: false
+      };
+      document.getElementById('currentTime').textContent = 
+        now.toLocaleTimeString('id-ID', timeOptions);
+    }
+
+    // Show toast notification
+    function showToast(message, type = 'success') {
+      const existingToast = document.querySelector('.toast');
+      if (existingToast) {
+        existingToast.remove();
+      }
+
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.textContent = message;
+      document.body.appendChild(toast);
+
+      setTimeout(() => {
+        toast.remove();
+      }, 5000);
+    }
+
+    // Add to history
+    function addToHistory(data) {
+      const historyItem = {
+        fileName: data.fileName,
+        nama: data.nama,
+        nim: data.nim,
+        kelas: data.kelas,
+        mataKuliah: data.mataKuliah,
+        tanggal: data.tanggal,
+        waktu: data.waktu,
+        fileSize: formatFileSize(data.fileSize)
+      };
+
+      uploadHistory.unshift(historyItem);
+      renderHistory();
+    }
+
+    // Render history list
+    function renderHistory() {
+      const historyList = document.getElementById('historyList');
+      const historySection = document.getElementById('historySection');
+
+      if (uploadHistory.length === 0) {
+        historySection.classList.add('hidden');
+        return;
+      }
+
+      historySection.classList.remove('hidden');
+      historyList.innerHTML = '';
+
+      uploadHistory.forEach((item, index) => {
+        const historyItem = document.createElement('div');
+        historyItem.className = 'history-item bg-green-50 border border-green-200 rounded-lg p-4 hover:bg-green-100 transition-colors';
+        
+        historyItem.innerHTML = `
+          <div class="flex items-start gap-4">
+            <div class="flex-shrink-0">
+              <svg class="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+              </svg>
+            </div>
+            <div class="flex-grow">
+              <div class="flex items-center gap-2 mb-2">
+                <h3 class="font-bold text-gray-800">${item.fileName}</h3>
+                <span class="text-xs bg-green-600 text-white px-2 py-1 rounded-full">✓ Tersimpan di Drive</span>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-gray-700">
+                <p><span class="font-semibold">Nama:</span> ${item.nama}</p>
+                <p><span class="font-semibold">NIM:</span> ${item.nim}</p>
+                <p><span class="font-semibold">Kelas:</span> ${item.kelas}</p>
+                <p><span class="font-semibold">Mata Kuliah:</span> ${item.mataKuliah}</p>
+                <p><span class="font-semibold">Ukuran:</span> ${item.fileSize}</p>
+                <p><span class="font-semibold">Waktu:</span> ${item.tanggal} ${item.waktu}</p>
+              </div>
+            </div>
+          </div>
+        `;
+        
+        historyList.appendChild(historyItem);
+      });
+    }
+
+    // Setup file upload
+    function setupFileUpload() {
+      const uploadArea = document.getElementById('uploadArea');
+      const fileInput = document.getElementById('fileInput');
+      const filePreview = document.getElementById('filePreview');
+      const fileName = document.getElementById('fileName');
+      const fileSize = document.getElementById('fileSize');
+      const removeFileBtn = document.getElementById('removeFile');
+
+      uploadArea.addEventListener('click', () => {
+        fileInput.click();
+      });
+
+      fileInput.addEventListener('change', (e) => {
+        handleFileSelect(e.target.files[0]);
+      });
+
+      uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.classList.add('drag-over');
+      });
+
+      uploadArea.addEventListener('dragleave', () => {
+        uploadArea.classList.remove('drag-over');
+      });
+
+      uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove('drag-over');
+        handleFileSelect(e.dataTransfer.files[0]);
+      });
+
+      removeFileBtn.addEventListener('click', () => {
+        selectedFile = null;
+        fileInput.value = '';
+        filePreview.classList.add('hidden');
+        uploadArea.style.display = 'block';
+      });
+
+      function handleFileSelect(file) {
+        if (!file) return;
+
+        const validTypes = [
+          'application/pdf',
+          'application/msword',
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        ];
+
+        if (!validTypes.includes(file.type)) {
+          showToast('Format file tidak valid! Gunakan PDF, DOC, atau DOCX', 'error');
+          return;
+        }
+
+        const maxSize = 10 * 1024 * 1024;
+        if (file.size > maxSize) {
+          showToast('Ukuran file terlalu besar! Maksimal 10MB', 'error');
+          return;
+        }
+
+        selectedFile = file;
+        fileName.textContent = file.name;
+        fileSize.textContent = formatFileSize(file.size);
+        filePreview.classList.remove('hidden');
+        uploadArea.style.display = 'none';
+      }
+    }
+
+    function formatFileSize(bytes) {
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB';
+      return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+    }
+
+    function fileToBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+      });
+    }
+
+    async function submitAssignment() {
+      const studentName = document.getElementById('studentName').value.trim();
+      const studentNIM = document.getElementById('studentNIM').value.trim();
+      const studentClass = document.getElementById('studentClass').value.trim();
+      const courseName = document.getElementById('courseName').value.trim();
+
+      if (!studentName) {
+        showToast('Mohon isi nama lengkap Anda!', 'error');
+        return;
+      }
+
+      if (!studentNIM) {
+        showToast('Mohon isi NIM Anda!', 'error');
+        return;
+      }
+
+      if (!studentClass) {
+        showToast('Mohon isi kelas Anda!', 'error');
+        return;
+      }
+
+      if (!courseName) {
+        showToast('Mohon isi mata kuliah!', 'error');
+        return;
+      }
+
+      if (!selectedFile) {
+        showToast('Mohon unggah file tugas!', 'error');
+        return;
+      }
+
+      const submitBtn = document.getElementById('submitBtn');
+      const originalText = submitBtn.querySelector('span').textContent;
+      submitBtn.querySelector('span').textContent = 'Mengirim...';
+      submitBtn.disabled = true;
+      submitBtn.classList.add('loading');
+
+      try {
+        const now = new Date();
+        const tanggal = now.toLocaleDateString('id-ID');
+        const waktu = now.toLocaleTimeString('id-ID', { hour12: false });
+
+        const fileBase64 = await fileToBase64(selectedFile);
+
+        const data = {
+          tanggal: tanggal,
+          waktu: waktu,
+          nama: studentName,
+          nim: studentNIM,
+          kelas: studentClass,
+          mataKuliah: courseName,
+          fileName: selectedFile.name,
+          fileType: selectedFile.type,
+          fileSize: selectedFile.size,
+          fileData: fileBase64
+        };
+
+        const response = await fetch(SCRIPT_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data)
+        });
+
+        showToast('✅ Tugas berhasil diunggah ke Google Drive!', 'success');
+        
+        addToHistory(data);
+
+        document.getElementById('studentName').value = '';
+        document.getElementById('studentNIM').value = '';
+        document.getElementById('studentClass').value = '';
+        document.getElementById('courseName').value = '';
+        document.getElementById('fileInput').value = '';
+        document.getElementById('filePreview').classList.add('hidden');
+        document.getElementById('uploadArea').style.display = 'block';
+        selectedFile = null;
+
+        setTimeout(() => {
+          document.getElementById('historySection').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }, 500);
+
+      } catch (error) {
+        console.error('Error:', error);
+        showToast('❌ Gagal mengirim tugas. Periksa koneksi internet Anda.', 'error');
+      } finally {
+        submitBtn.querySelector('span').textContent = originalText;
+        submitBtn.disabled = false;
+        submitBtn.classList.remove('loading');
+      }
+    }
+
+    async function onConfigChange(config) {
+      const customFont = config.font_family || defaultConfig.font_family;
+      const baseSize = config.font_size || defaultConfig.font_size;
+      const baseFontStack = 'system-ui, -apple-system, sans-serif';
+
+      document.body.style.fontFamily = `${customFont}, ${baseFontStack}`;
+      
+      document.getElementById('pageTitle').textContent = config.page_title || defaultConfig.page_title;
+      document.getElementById('pageTitle').style.fontSize = `${baseSize * 2}px`;
+      
+      document.getElementById('subjectName').textContent = config.subject_name || defaultConfig.subject_name;
+      document.getElementById('subjectName').style.fontSize = `${baseSize * 1}px`;
+      
+      document.getElementById('submitBtnText').textContent = config.submit_button_text || defaultConfig.submit_button_text;
+      
+      const submitBtn = document.getElementById('submitBtn');
+      submitBtn.style.backgroundColor = config.button_color || defaultConfig.button_color;
+      submitBtn.style.fontSize = `${baseSize * 1.125}px`;
+      
+      document.getElementById('app').style.background = `linear-gradient(to bottom right, ${config.background_color || defaultConfig.background_color}, #c7d2fe)`;
+      
+      const cards = document.querySelectorAll('main, aside, footer');
+      cards.forEach(card => {
+        card.style.backgroundColor = config.card_color || defaultConfig.card_color;
+      });
+      
+      const labels = document.querySelectorAll('label, .text-gray-800, .text-gray-700');
+      labels.forEach(label => {
+        label.style.color = config.text_color || defaultConfig.text_color;
+      });
+    }
+
+    if (window.elementSdk) {
+      window.elementSdk.init({
+        defaultConfig: defaultConfig,
+        onConfigChange: onConfigChange,
+        mapToCapabilities: (config) => ({
+          recolorables: [
+            {
+              get: () => config.background_color || defaultConfig.background_color,
+              set: (value) => {
+                config.background_color = value;
+                window.elementSdk.setConfig({ background_color: value });
+              }
+            },
+            {
+              get: () => config.card_color || defaultConfig.card_color,
+              set: (value) => {
+                config.card_color = value;
+                window.elementSdk.setConfig({ card_color: value });
+              }
+            },
+            {
+              get: () => config.text_color || defaultConfig.text_color,
+              set: (value) => {
+                config.text_color = value;
+                window.elementSdk.setConfig({ text_color: value });
+              }
+            },
+            {
+              get: () => config.primary_color || defaultConfig.primary_color,
+              set: (value) => {
+                config.primary_color = value;
+                window.elementSdk.setConfig({ primary_color: value });
+              }
+            },
+            {
+              get: () => config.button_color || defaultConfig.button_color,
+              set: (value) => {
+                config.button_color = value;
+                window.elementSdk.setConfig({ button_color: value });
+              }
+            }
+          ],
+          borderables: [],
+          fontEditable: {
+            get: () => config.font_family || defaultConfig.font_family,
+            set: (value) => {
+              config.font_family = value;
+              window.elementSdk.setConfig({ font_family: value });
+            }
+          },
+          fontSizeable: {
+            get: () => config.font_size || defaultConfig.font_size,
+            set: (value) => {
+              config.font_size = value;
+              window.elementSdk.setConfig({ font_size: value });
+            }
+          }
+        }),
+        mapToEditPanelValues: (config) => new Map([
+          ['page_title', config.page_title || defaultConfig.page_title],
+          ['subject_name', config.subject_name || defaultConfig.subject_name],
+          ['submit_button_text', config.submit_button_text || defaultConfig.submit_button_text]
+        ])
+      });
+    }
+
+    updateDateTime();
+    setInterval(updateDateTime, 1000);
+    setupFileUpload();
+    
+    document.getElementById('submitBtn').addEventListener('click', submitAssignment);
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b28ab8624c34acd',t:'MTc2NjUwMTQxMy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
